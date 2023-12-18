@@ -1,0 +1,2 @@
+# Kotodama
+Dragon Raja - Kotodama
