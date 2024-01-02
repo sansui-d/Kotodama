@@ -1,15 +1,11 @@
 <script setup lang="ts">
-import Button from "@/components/Button.vue";
+import HomeView from '@/views/HomeView.vue'
 </script>
 
 <template>
-  <div class="wrapper">
-    <Button text="按钮" />
+  <div class="kotodama p-1">
+    <HomeView />
   </div>
 </template>
 
-<style scoped>
-.wrapper {
-  display: flex;
-}
-</style>
+<style scoped></style>
