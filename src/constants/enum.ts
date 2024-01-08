@@ -9,4 +9,12 @@ export enum BLOODLINE_ORIGIN {
 export enum RISK_LEVEL {
     NONE = 0,
     LOW = 1,
+    MIDDLE = 2,
+}
+export enum USER {
+    LU = '路明非',
+    NF = '尼古拉斯·弗拉梅尔',
+    AB = '安倍晴明',
+    WF = '万博倩',
+    BS = '平安时代阴阳寮某佚名博士',
 }
