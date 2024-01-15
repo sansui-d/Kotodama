@@ -1,20 +1,54 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
 import type { ICardProps } from '@/constants/types'
-import { useCardWrapperStore } from '@/stores/cardWrapperDataStore'
-defineProps<ICardProps>()
-const { cardData } = storeToRefs(useCardWrapperStore())
+defineProps<{cardData?:ICardProps}>();
+const handleCloseWrapper = () => {
+  
+}
 </script>
 
 <template>
-  <div class="card-warpper w-[50rem] h-[50rem] p-10 fixed top-2/4 left-2/4 translate-y-50 translate-x-50">
-    <div></div>
-    <div>{{ cardData.index }}</div>
-    <div>{{ cardData.name }}</div>
-    <div>{{ cardData.index }}</div>
-    <div>{{ cardData.index }}</div>
-    <div>{{ cardData.index }}</div>
+  <div
+    class="card-warpper rounded-2xl bg-neutral-400 w-[50rem] h-[30rem] p-10 fixed top-2/4 left-2/4 
+           translate-y-50 translate-x-50"
+  >
+    <div class="close" @click="handleCloseWrapper"></div>
+    <div>{{ cardData?.index }}</div>
+    <div>{{ cardData?.name }}</div>
+    <div>{{ cardData?.index }}</div>
+    <div>{{ cardData?.index }}</div>
   </div>
 </template>
 
-<style scoped></style>
+<style lang="less" scoped>
+.close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  cursor: pointer;
+
+  &:hover::after {
+    background-color: aqua;
+  }
+  &:hover::before {
+    background-color: aqua;
+  }
+}
+.close::before,
+.close::after {
+    content: '';
+    width: 1px;
+    height: 100%;
+    background: #333;
+    display: block;
+    transform: rotate(45deg) translateX(0px);
+    position: absolute;
+    left: 50%;
+    top: 0;
+}
+.close::after {
+    transform: rotate(-45deg) translateX(0px);
+}
+</style>

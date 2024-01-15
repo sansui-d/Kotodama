@@ -15,5 +15,7 @@ module.exports = {
     "vue/multi-word-component-names": "off",
     "no-undef": 0,
     "max-len": ["error", {"code": 120}],
+    "vue/singleline-html-element-content-newline": 0,
+    "vue/new-line-between-multi-line-property": 0
   },
 };
