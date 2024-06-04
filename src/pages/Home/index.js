@@ -6,7 +6,7 @@ function Home() {
     const req = async (tpage, size) => {
         // 请求，并传入分页参数
         const request = await fetch(
-            `https://www.vilipix.com/api/v1/picture/public?limit=${size}&sort=hot&offset=${--tpage * size}`
+            `https://www.vilipix.com/api/v1/picture/public?limit=${size}&sort=new&offset=${--tpage * size}`
         );
         // 数据处理
         let {
@@ -24,7 +24,7 @@ function Home() {
 
     return (
         <div className='home'>
-            <VirtualWaterfall request={req} column={5} pageSize={25} gap={15} >
+            <VirtualWaterfall request={req} column={5} pageSize={30} gap={15} >
                 {(detail) => (
                     <div className="card-item">
                         <img src={detail.src} />
