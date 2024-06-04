@@ -3,6 +3,7 @@ import { Provider } from 'react-redux'
 import { RouterProvider } from 'react-router-dom';
 import store from '@store/index'
 import routers from '@routes/index';
+import './App.css'
 
 export const AppContext = createContext(null);
 
