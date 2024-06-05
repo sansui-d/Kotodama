@@ -18,18 +18,18 @@ const VirtualWaterfall = (props) => {
     const scrollBoxRef = useRef(null);
 
     const itemSizeInfo = useMemo(() => {
-        return list?.reduce((pre, current) => {
+        return list?.map((item) => {
             const itemWidth = Math.floor((scrollBoxRef.current?.clientWidth - (column - 1) * gap) / column);
-            pre.set(current?.id, {
+            return {
+                id: item?.id,
                 width: itemWidth,
-                height: Math.floor((itemWidth * current.height) / current?.width)
-            });
-            return pre;
-        }, new Map());
+                height: Math.floor((itemWidth * item.height) / item?.width)
+            }
+        });
     }, [list]);
 
     useEffect(() => {
-        itemSizeInfo.size && addInQueue();
+        itemSizeInfo.length && addInQueue();
     }, [itemSizeInfo]);
 
     const renderList = useMemo(() => {
@@ -60,6 +60,7 @@ const VirtualWaterfall = (props) => {
 
     const addInQueue = (size = pageSize) => {
         let currentTotal = total
+        console.log(columns, 'columns1')
         for (let i = 0; i < size; i++) {
             const minIndex = getMinColumnHeight().minIndex;
             const currentColumn = columns[minIndex];
@@ -70,15 +71,15 @@ const VirtualWaterfall = (props) => {
             currentColumn.height += +item.h;
             currentTotal += 1;
         }
+        console.log(columns, 'columns2')
         setColumns([...columns])
         setTotal(currentTotal)
     };
 
     const generatorItem = (item, before, index) => {
-        const rect = itemSizeInfo.get(item?.id);
-        // console.log(rect, 'rect')
-        const width = rect?.width;
-        const height = rect?.height;
+        const rect = itemSizeInfo.filter((i) => i?.id === item?.id);
+        const width = rect?.[0]?.width;
+        const height = rect?.[0]?.height;
         let y = 0;
         if (before) y = before?.y + before?.h + gap;
 
