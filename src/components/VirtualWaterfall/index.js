@@ -1,33 +1,21 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import {useSize, useScroll} from 'react-use'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { rafThrottle } from './tool';
 import './index.less';
 
 const VirtualWaterfall = (props) => {
-    const {column, pageSize, gap, request} = props;
+    const { column, pageSize, gap, request } = props;
+
     const [loading, setLoading] = useState(false);
     const [isFinish, setIsFinish] = useState(false);
     const [pageNo, setPageNo] = useState(1);
     const [list, setList] = useState([]);
 
-    const [scrollState, setScrollState] = useState({
-        viewWidth: 0,
-        viewHeight: 0,
-        start: 0
-    });
-
     const [columns, setColumns] = useState(() => new Array(column).fill(0).map(() => ({ list: [], height: 0 })))
     const [total, setTotal] = useState(0)
 
-    const [queueState, setQueueState] = useState({
-        queue: new Array(column).fill(0).map(() => ({ list: [], height: 0 })),
-        len: 0
-    });
     const [listStyle, setListStyle] = useState({});
 
     const scrollBoxRef = useRef(null);
-    // const [sized, {width: scrolBoxWidth, height: scrolBoxHeight}] = useSize(scrollBoxRef)
-    // const {scrollBoxX, scrollBoxY} = useScroll(scrollBoxRef);
 
     const itemSizeInfo = useMemo(() => {
         return list?.reduce((pre, current) => {
@@ -44,23 +32,17 @@ const VirtualWaterfall = (props) => {
         itemSizeInfo.size && addInQueue();
     }, [itemSizeInfo]);
 
-    const end = useMemo(() => scrollBoxRef.current?.clientHeight + scrollBoxRef.current?.scrollTop, [scrollBoxRef.current?.clientHeight, scrollBoxRef.current?.scrollTop]);
+    const renderList = useMemo(() => {
+        const end = scrollBoxRef.current?.clientHeight + scrollBoxRef.current?.scrollTop;
+        const cardList = columns.reduce((pre, { list }) => pre.concat(list), []);
+        return cardList.filter((i) => i.h + i.y > scrollBoxRef.current?.scrollTop && i.y < end)
+    }, [columns, scrollBoxRef.current?.clientHeight, scrollBoxRef.current?.scrollTop]);
 
-    const cardList = useMemo(
-        () => queueState.queue.reduce((pre, { list }) => pre.concat(list), []),
-        [queueState]
-    );
-
-    const renderList = useMemo(
-        () => cardList.filter((i) => i.h + i.y > scrollBoxRef.current?.scrollTop && i.y < end),
-        [queueState, end]
-    );
-
-    const computedHeight = () => {
+    const getMinColumnHeight = useCallback(() => {
         let minIndex = 0,
             minHeight = Infinity,
             maxHeight = -Infinity;
-        queueState.queue.forEach(({ height }, index) => {
+        columns.forEach(({ height }, index) => {
             if (height < minHeight) {
                 minHeight = height;
                 minIndex = index;
@@ -69,33 +51,32 @@ const VirtualWaterfall = (props) => {
                 maxHeight = height;
             }
         });
-        setListStyle({ height: `${maxHeight}px` });
+        setListStyle({ height: maxHeight });
         return {
             minIndex,
             minHeight
         };
-    };
+    }, [columns]);
 
     const addInQueue = (size = pageSize) => {
-        const queue = queueState.queue;
-        let len = queueState.len;
+        let currentTotal = total
         for (let i = 0; i < size; i++) {
-            const minIndex = computedHeight().minIndex;
-            const currentColumn = queue[minIndex];
+            const minIndex = getMinColumnHeight().minIndex;
+            const currentColumn = columns[minIndex];
             const before = currentColumn.list[currentColumn.list.length - 1] || null;
-            const dataItem = list[len];
+            const dataItem = list[currentTotal];
             const item = generatorItem(dataItem, before, minIndex);
             currentColumn.list.push(item);
             currentColumn.height += +item.h;
-            len++;
+            currentTotal += 1;
         }
-        setQueueState({ queue: [...queue], len });
-        setColumns([...queue])
-        setTotal(len)
+        setColumns([...columns])
+        setTotal(currentTotal)
     };
 
-    const generatorItem = (item, before, index)=> {
+    const generatorItem = (item, before, index) => {
         const rect = itemSizeInfo.get(item?.id);
+        // console.log(rect, 'rect')
         const width = rect?.width;
         const height = rect?.height;
         let y = 0;
@@ -113,44 +94,32 @@ const VirtualWaterfall = (props) => {
         };
     };
 
-    const loadDataList = async () => {
-        if (isFinish) return;
-        setLoading(true)
-        // if (!request) return;
-        const res = await request(pageNo + 1, pageSize);
-        if (!res?.length) {
-            setIsFinish(true)
-            return;
+    const getDataList = async () => {
+        if (isFinish || !request) return;
+        try {
+            setLoading(true)
+            const res = await request(pageNo + 1, pageSize);
+            if (!res?.length) {
+                setIsFinish(true)
+                return;
+            }
+            setLoading(false);
+            setPageNo(pageNo + 1)
+            setList([...list, ...res]);
+        } catch(err) {
+            console.log(err)
         }
-        setLoading(false);
-        setPageNo(pageNo + 1)
-        setList([...list, ...res]);
-        return res.length;
-    }; 
+    };
 
     const handleScroll = rafThrottle(() => {
         const { scrollTop, clientHeight } = scrollBoxRef.current;
-        setScrollState({ ...scrollState, start: scrollTop });
-        if (scrollTop + clientHeight >= computedHeight().minHeight) {
-            !loading && loadDataList();
+        if (scrollTop + clientHeight >= getMinColumnHeight().minHeight) {
+            !loading && getDataList();
         }
     });
 
-    const initScrollState = () => {
-        setScrollState({
-            viewWidth: +scrollBoxRef.current.clientWidth,
-            viewHeight: +scrollBoxRef.current.clientHeight,
-            start: +scrollBoxRef.current.scrollTop
-        });
-    };
-
-    const init = async () => {
-        initScrollState();
-        await loadDataList();
-    };
-
     useEffect(() => {
-        init();
+        getDataList();
     }, []);
 
     return (
