@@ -1,21 +1,22 @@
-import React, { createContext } from 'react';
-import { Provider } from 'react-redux'
-import { RouterProvider } from 'react-router-dom';
-import store from '@store/index'
-import routers from '@routes/index';
+import React from 'react';
+import VirtualWaterfall from '@components/VirtualWaterfall';
 import './App.css'
 
-export const AppContext = createContext(null);
-
 function App() {
-
+    const request = async (tpage, size) => {
+        const request = await fetch(`https://www.vilipix.com/api/v1/picture/public?limit=${size}&sort=new&offset=${--tpage * size}`);
+        let {data: { rows }} = await request.json();
+        rows = rows.map((item) => ({
+            id: item.picture_id,
+            width: item.width,
+            height: item.height,
+            src: item.regular_url + '?x-oss-process=image/resize,w_240/format,jpg'
+        }));
+        return rows;
+    };
     return (
         <div className="app">
-            <Provider store={store}>
-                <AppContext.Provider value="hello world">
-                    <RouterProvider router={routers} />
-                </AppContext.Provider>
-            </Provider>
+            <VirtualWaterfall request={request} column={5} pageSize={30} gap={15} />
         </div>
     );
 }

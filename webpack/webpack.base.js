@@ -13,12 +13,7 @@ module.exports = {
         extensions: ['.js'],
         alias: {
             '@components': path.resolve(__dirname, '../src/components'),
-            '@utils': path.resolve(__dirname, '../src/utils'),
-            '@assets': path.resolve(__dirname, '../src/assets'),
-            '@store': path.resolve(__dirname, '../src/store'),
-            '@constants': path.resolve(__dirname, '../src/constants'),
-            '@pages': path.resolve(__dirname, '../src/pages'),
-            '@routes': path.resolve(__dirname, '../src/routes')
+            '@pages': path.resolve(__dirname, '../src/pages')
         }
     },
     module: {
