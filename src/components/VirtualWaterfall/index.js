@@ -109,7 +109,7 @@ const VirtualWaterfall = (props) => {
 
     const throttle = (fn) => {
         let lock = false;
-        return function (...args) {
+        return (...args) => {
             if (lock) return;
             lock = true;
             window.requestAnimationFrame(() => {
